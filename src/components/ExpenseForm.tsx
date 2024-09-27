@@ -6,6 +6,7 @@ import ErrorMessage from "./ErrorMessage";
 
 import "react-date-picker/dist/DatePicker.css";
 import "react-calendar/dist/Calendar.css";
+import { useBudget } from "../hooks/useBudget";
 
 export default function ExpenseForm() {
   const [expense, setExpense] = useState<DraftExpense>({
@@ -17,21 +18,23 @@ export default function ExpenseForm() {
 
   const [error, setError] = useState('');
 
+  const { dispatch } = useBudget();
+
   const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
-    const {name, value} = e.target;
+    const { name, value } = e.target;
     const isAmountField = ['amount'].includes(name);
     setExpense({
-        ...expense,
-        [name] : isAmountField ? +value : value
+      ...expense,
+      [name]: isAmountField ? +value : value
     })
 
 
   };
 
-  const handleChangeDate = (value : Value) => {
+  const handleChangeDate = (value: Value) => {
     setExpense({
-        ...expense,
-        date: value
+      ...expense,
+      date: value
     });
   };
 
@@ -39,11 +42,24 @@ export default function ExpenseForm() {
     e.preventDefault();
 
     // Validar
-    if(Object.values(expense).includes('')){
-        setError('Todos los campos son obligatorios')
-        return;
-    }else{
-        console.log('TODO BIEN');
+    if (Object.values(expense).includes('')) {
+      setError('Todos los campos son obligatorios')
+      return;
+    } else {
+      setError('');
+
+      // Agregar un nuevo gasto
+      dispatch({
+        type: 'add-expense',
+        payload: { expense }
+      });
+
+      setExpense({
+        amount: 0,
+        expenseName: "",
+        category: "",
+        date: new Date(),
+      });
     }
 
   }
