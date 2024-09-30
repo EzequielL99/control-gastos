@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState} from "react";
 import type { DraftExpense, Value } from "../types";
 import { categories } from "../data/categories";
 import DatePicker from "react-date-picker";
@@ -18,12 +18,15 @@ export default function ExpenseForm() {
 
   const [error, setError] = useState('');
 
-  const { state, dispatch } = useBudget();
+  const [previousAmount, setPreviousAmount] = useState(0);
+
+  const { state, dispatch, remainingBudget } = useBudget();
 
   useEffect(() => {
     if (state.editingId) {
       const editingExpense = state.expenses.filter(currentExpense => currentExpense.id === state.editingId)[0];
       setExpense(editingExpense);
+      setPreviousAmount(expense.amount);
     }
   }, [state.editingId])
 
@@ -52,27 +55,32 @@ export default function ExpenseForm() {
     if (Object.values(expense).includes('')) {
       setError('Todos los campos son obligatorios')
       return;
+    }
+
+    // Validar no superar el limite
+    if ((expense.amount - previousAmount) > remainingBudget) {
+      setError('Ese gasto supera el monto disponible')
+      return;
+    }
+    setError('');
+
+    // Agregar un nuevo gasto o actualizar
+    if (state.editingId) {
+      dispatch({ type: 'update-expense', payload: { expense: { id: state.editingId, ...expense } } })
     } else {
-      setError('');
-
-      // Agregar un nuevo gasto o actualizar
-      if (state.editingId) {
-        dispatch({ type: 'update-expense', payload: { expense: { id: state.editingId, ...expense } } })
-      } else {
-        dispatch({
-          type: 'add-expense',
-          payload: { expense }
-        });
-      }
-
-
-      setExpense({
-        amount: 0,
-        expenseName: "",
-        category: "",
-        date: new Date(),
+      dispatch({
+        type: 'add-expense',
+        payload: { expense }
       });
     }
+
+
+    setExpense({
+      amount: 0,
+      expenseName: "",
+      category: "",
+      date: new Date(),
+    });
 
   }
 
