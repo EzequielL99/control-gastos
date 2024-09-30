@@ -57,7 +57,7 @@ export default function ExpenseForm() {
 
       // Agregar un nuevo gasto o actualizar
       if (state.editingId) {
-        dispatch({type: 'update-expense', payload: { expense: { id: state.editingId, ...expense} }})
+        dispatch({ type: 'update-expense', payload: { expense: { id: state.editingId, ...expense } } })
       } else {
         dispatch({
           type: 'add-expense',
@@ -82,7 +82,7 @@ export default function ExpenseForm() {
         className="uppercase text-center text-2xl font-black 
             border-b-2 border-blue-500 py-2"
       >
-        Nuevo Gasto
+        {state.editingId ? 'Actualizar Gasto' : 'Nuevo Gasto'}
       </legend>
 
       {error && <ErrorMessage>{error}</ErrorMessage>}
@@ -154,7 +154,7 @@ export default function ExpenseForm() {
         type="submit"
         className="bg-blue-600 cursor-pointer w-full p-2 text-white 
                 uppercase font-bold rounded-lg"
-        value={"Registrar Gasto"}
+        value={state.editingId ? "Actualizar Gasto" : "Registrar Gasto"}
       />
     </form>
   );
